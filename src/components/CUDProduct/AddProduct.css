@@ -1,0 +1,10 @@
+.add-product-form {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.add-product-button {
+  margin-top: 1rem;
+  background-color: #3f51b5;
+}
