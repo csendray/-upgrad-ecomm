@@ -1,5 +1,5 @@
-import React, { useState, useContext } from "react";
-import { Box, TextField, Button, Typography, Link } from "@mui/material";
+import React, { useState, useContext, useCallback } from "react";
+import { Box, TextField, Button, Typography } from "@mui/material";
 import { UserContext } from "../signup/UserContext"; // UserContext.js
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -10,48 +10,57 @@ const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Handle input field changes
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleInputChange = useCallback((e) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [e.target.name]: e.target.value,
+    }));
+  }, []);
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(""); // Reset error state
-    try {
-      // Simulate a successful login request
-      const response = await axios.post(
-        "https://dev-project-ecommerce.upgrad.dev/api/auth/signin",
-        formData
-      );
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setError(""); // Reset error state
+      setLoading(true); // Set loading state
+      try {
+        const response = await axios.post(
+          "https://dev-project-ecommerce.upgrad.dev/api/auth/signin",
+          formData
+        );
 
-      console.log("Full Response header:", response.data, response.data.token);
+        // Check if token exists in the response body, typically in response.data.token
+        const token =
+          response.headers["x-auth-token"] ||
+          "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbmFkYW1AZXNob3AuY29tIiwiaWF0IjoxNzM0ODg2NDIwLCJleHAiOjE3MzQ4OTQ4MjB9._8zeUIZNFNEevlDbLSiK5qvz9hqY3wrcI8Cq4JjIx3KTMjM2ncnB-umTxzcfM9u17dZwkkSYCo0q45eGFJbMsQ";
+        console.log(token);
 
-      // Check if token exists in the response body, typically in response.data.token
-      const token =
-        response.headers["x-auth-token"] ||
-        "	eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbmFkYW1AZXNob3AuY29tIiwiaWF0IjoxNzM0ODcxNjgwLCJleHAiOjE3MzQ4ODAwODB9.C8YPYtPlGxU4Y8viNS66InsHTjUnE7NszRlyaSkFKGtkEEKB_dKJ7uU1nt9I2Ajzw3E_ZhaspbBtqwEQvqSukw";
-      // Store the manually assigned token in sessionStorage
-      sessionStorage.setItem("authToken", token);
+        if (token) {
+          // Store the manually assigned token in sessionStorage
+          sessionStorage.setItem("authToken", token);
+          axios.defaults.headers["x-auth-token"] = token;
 
-      // Set the token in axios default headers for future requests
-      axios.defaults.headers["x-auth-token"] = token;
+          setUser({ isLoggedIn: true, role: response.data.roles[0] });
+          navigate("/list");
+        } else {
+          throw new Error("Token not found");
+        }
+      } catch (err) {
+        setError(
+          err.response?.data?.message ||
+            "Invalid credentials. Please try again."
+        );
+      } finally {
+        setLoading(false); // Reset loading state
+      }
+    },
+    [formData, navigate, setUser]
+  );
 
-      console.log(response.data.roles[0]);
-
-      setUser({ isLoggedIn: true, role: response.data.roles[0] });
-
-      // Navigate to home screen
-      navigate("/list");
-    } catch (err) {
-      console.error("Login error:", err); // Debugging
-      setError(
-        err.response?.data?.message || "Invalid credentials. Please try again."
-      );
-    }
-  };
+  const handleSignupNavigation = useCallback(() => {
+    navigate("/signup");
+  }, [navigate]);
 
   return (
     <Box
@@ -102,19 +111,34 @@ const Login = () => {
           type="submit"
           variant="contained"
           fullWidth
+          disabled={loading}
           sx={{ mt: 2, backgroundColor: "#3f51b5" }}
         >
-          SIGN IN
+          {loading ? "Signing In..." : "SIGN IN"}
         </Button>
       </Box>
       <Typography
         variant="body2"
         sx={{ mt: 2, textAlign: "center", marginTop: "10px" }}
       >
-        Don't have an account? <Link href="/signup">Sign up</Link>
+        Don't have an account?{" "}
+        <Button
+          variant="text"
+          onClick={handleSignupNavigation}
+          sx={{
+            textTransform: "none",
+            padding: 0,
+            color: "#3f51b5",
+            textDecoration: "underline",
+          }}
+        >
+          Sign up
+        </Button>
       </Typography>
       <Typography variant="body2" sx={{ mt: 4, textAlign: "right" }}>
-        Copyright © <Link href="/">upGrad</Link> 2024.
+        Copyright ©{" "}
+        <span style={{ textTransform: "none", color: "#3f51b5" }}>upGrad</span>{" "}
+        2024.
       </Typography>
     </Box>
   );

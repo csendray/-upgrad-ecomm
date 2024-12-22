@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Box, TextField, Button, Typography, Link } from "@mui/material";
+import React, { useState, useCallback } from "react";
+import { Box, TextField, Button, Typography } from "@mui/material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import LockIcon from "@mui/icons-material/Lock";
@@ -17,6 +17,10 @@ const Signup = () => {
 
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState(""); // New success message state
+
+  const handleSigninNavigation = useCallback(() => {
+    navigate("/login");
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -83,7 +87,7 @@ const Signup = () => {
       // Optionally, navigate to login after a short delay
       setTimeout(() => {
         navigate("/login");
-      }, 4000);
+      }, 3000);
     } catch (err) {
       setErrors((prev) => ({
         ...prev,
@@ -251,9 +255,16 @@ const Signup = () => {
           sx={{ textAlign: "center", marginTop: "10px" }}
         >
           Already have an account?{" "}
-          <Link href="/login" underline="none" sx={{ color: "#3f51b5" }}>
+          <span
+            onClick={handleSigninNavigation}
+            style={{
+              color: "#3f51b5",
+              textDecoration: "underline",
+              cursor: "pointer",
+            }}
+          >
             Sign in
-          </Link>
+          </span>
         </Typography>
       )}
     </Box>
