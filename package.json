@@ -2,8 +2,8 @@
   "name": "upgrad-ecomm",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://csendray.github.io/upgrad-ecomm",
   "dependencies": {
-    "homepage": "https://csendray.github.io/upgrad-ecomm",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.2.1",
